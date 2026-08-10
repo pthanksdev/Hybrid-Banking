@@ -1,0 +1,38 @@
+{
+  "name": "hybrid-banking-platform",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Hybrid Banking, Blockchain & Meme Coin Platform",
+  "scripts": {
+    "build": "pnpm -r run build",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "format": "prettier --write \"**/*.ts\"",
+    "ledger": "pnpm --filter ledger-core run start:dev",
+    "identity": "pnpm --filter identity-kyc run start:dev",
+    "banking": "pnpm --filter core-banking run start:dev",
+    "payments": "pnpm --filter payments run start:dev",
+    "p2p": "pnpm --filter p2p-transfers run start:dev",
+    "wallet": "pnpm --filter wallet-custody run start:dev",
+    "blockchain": "pnpm --filter blockchain-gateway run start:dev",
+    "defi": "pnpm --filter defi-integrations run start:dev",
+    "memecoin": "pnpm --filter memecoin-service run start:dev",
+    "risk": "pnpm --filter risk-fraud run start:dev",
+    "notifications": "pnpm --filter notifications run start:dev",
+    "compliance": "pnpm --filter reporting-compliance run start:dev",
+    "gateway": "pnpm --filter gateway run start:dev",
+    "dev:all": "pnpm -r --parallel run start:dev"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "@types/jest": "^29.5.0",
+    "prettier": "^3.3.0",
+    "prisma": "5.22.0",
+    "@prisma/client": "5.22.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
