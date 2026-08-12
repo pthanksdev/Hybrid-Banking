@@ -1,0 +1,36 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model OnChainDeposit {
+  id              String   @id @default(cuid())
+  chain           String
+  txHash          String   @unique @map("tx_hash")
+  blockNumber     BigInt   @map("block_number")
+  fromAddress     String   @map("from_address")
+  toAddress       String   @map("to_address")
+  amount          BigInt
+  tokenAddress    String?  @map("token_address")
+  confirmations   Int      @default(0)
+  status          String
+  ledgerTxId      String?  @map("ledger_tx_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([toAddress])
+  @@index([status])
+  @@map("onchain_deposits")
+}
+
+model IndexerBlockState {
+  chain       String   @id
+  lastBlock   BigInt   @map("last_block")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  @@map("indexer_block_states")
+}
