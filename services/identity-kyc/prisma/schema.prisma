@@ -1,0 +1,92 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum KycStatus {
+  UNVERIFIED
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  COMPLIANCE_OFFICER
+}
+
+model User {
+  id               String            @id @default(cuid())
+  email            String            @unique
+  passwordHash     String            @map("password_hash")
+  firstName        String            @map("first_name")
+  lastName         String            @map("last_name")
+  phone            String?
+  role             UserRole          @default(USER)
+  kycStatus        KycStatus         @default(UNVERIFIED) @map("kyc_status")
+  kycTier          String            @default("NONE") @map("kyc_tier")
+  verifications    KycVerification[]
+  screeningResults ScreeningResult[]
+  auditLogs        KycAuditLog[]
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @updatedAt @map("updated_at")
+
+  @@map("users")
+}
+
+model KycVerification {
+  id               String    @id @default(cuid())
+  userId           String    @map("user_id")
+  user             User      @relation(fields: [userId], references: [id])
+  documentType     String    @map("document_type")
+  documentNumber   String    @map("document_number")
+  documentCountry  String?   @map("document_country")
+  documentFrontUrl String?   @map("document_front_url")
+  documentBackUrl  String?   @map("document_back_url")
+  selfieUrl        String?   @map("selfie_url")
+  status           KycStatus @default(PENDING)
+  decision         String?
+  decisionReason   String?   @map("decision_reason")
+  decidedBy        String?   @map("decided_by")
+  providerResponse Json?     @map("provider_response")
+  pepScreened      Boolean   @default(false) @map("pep_screened")
+  sanctionScreened Boolean   @default(false) @map("sanction_screened")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@map("kyc_verifications")
+}
+
+model ScreeningResult {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+  type      String
+  provider  String
+  matched   Boolean  @default(false)
+  details   Json?
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@map("screening_results")
+}
+
+model KycAuditLog {
+  id          String     @id @default(cuid())
+  userId      String     @map("user_id")
+  user        User       @relation(fields: [userId], references: [id])
+  action      String
+  fromState   KycStatus? @map("from_state")
+  toState     KycStatus  @map("to_state")
+  performedBy String     @map("performed_by")
+  reason      String?
+  createdAt   DateTime   @default(now()) @map("created_at")
+
+  @@map("kyc_audit_logs")
+}
