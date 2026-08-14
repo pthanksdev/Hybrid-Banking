@@ -1,0 +1,56 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+model LedgerAccount {
+  id        String        @id @default(cuid())
+  name      String
+  type      AccountType
+  currency  String        @default("USD")
+  status    String        @default("ACTIVE") // ACTIVE, FROZEN, CLOSED
+  metadata  Json?
+  entries   LedgerEntry[]
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  @@map("ledger_accounts")
+}
+
+model LedgerEntry {
+  id            String        @id @default(cuid())
+  transactionId String        @map("transaction_id")
+  accountId     String        @map("account_id")
+  account       LedgerAccount @relation(fields: [accountId], references: [id])
+  amount        BigInt // Positive = Credit, Negative = Debit
+  currency      String        @default("USD")
+  description   String?
+  metadata      Json?
+  createdAt     DateTime      @default(now()) @map("created_at")
+
+  @@index([transactionId])
+  @@index([accountId])
+  @@map("ledger_entries")
+}
+
+model IdempotencyKey {
+  key          String   @id
+  responseBody Json     @map("response_body")
+  statusCode   Int      @map("status_code")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@map("idempotency_keys")
+}
