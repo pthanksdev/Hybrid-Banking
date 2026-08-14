@@ -1,0 +1,72 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Represents a distinct asset type (USD, ETH, MemeCoin)
+model Currency {
+  code      String    @id // e.g., USD, ETH, MEME
+  decimals  Int       // e.g., 2 for USD (cents), 18 for ETH (wei)
+  accounts  Account[]
+}
+
+enum AccountType {
+  ASSET
+  LIABILITY
+  EQUITY
+  REVENUE
+  EXPENSE
+}
+
+// Represents a double-entry ledger account
+model Account {
+  id           String      @id @default(uuid())
+  name         String      // e.g., "User A Spending", "System Revenue"
+  currencyCode String
+  currency     Currency    @relation(fields: [currencyCode], references: [code])
+  type         AccountType 
+  
+  entries      Entry[]
+  
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+}
+
+enum TxStatus {
+  PENDING
+  POSTED
+  FAILED
+  REVERSED
+}
+
+// Represents a group of entries that balance to zero
+model Transaction {
+  id        String    @id @default(uuid())
+  reference String?   // Optional external reference ID
+  status    TxStatus  @default(PENDING)
+  entries   Entry[]
+  
+  createdAt DateTime  @default(now())
+  postedAt  DateTime? // When it settled
+}
+
+// Represents a single line item (debit/credit) in a transaction
+model Entry {
+  id            String      @id @default(uuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  
+  accountId     String
+  account       Account     @relation(fields: [accountId], references: [id])
+  
+  amount        BigInt      // Positive for debit, Negative for credit (or vice versa based on accounting rules)
+  
+  createdAt     DateTime    @default(now())
+}
