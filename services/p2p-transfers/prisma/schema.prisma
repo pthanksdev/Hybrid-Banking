@@ -1,0 +1,27 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model P2pTransfer {
+  id              String   @id @default(cuid())
+  senderUserId    String   @map("sender_user_id")
+  recipientUserId String   @map("recipient_user_id")
+  senderLedgerAcc String   @map("sender_ledger_acc")
+  recipLedgerAcc  String   @map("recip_ledger_acc")
+  amount          BigInt
+  currency        String
+  note            String?
+  status          String
+  ledgerTxId      String?  @map("ledger_tx_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([senderUserId])
+  @@index([recipientUserId])
+  @@map("p2p_transfers")
+}
