@@ -1,0 +1,30 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model PaymentTransaction {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  type            String
+  direction       String
+  amount          BigInt
+  currency        String
+  status          String
+  processorRef    String?  @map("processor_ref")
+  ledgerTxId      String?  @map("ledger_tx_id")
+  sourceAccount   String?  @map("source_account")
+  destAccount     String?  @map("dest_account")
+  metadata        Json?
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  @@index([userId])
+  @@index([status])
+  @@map("payment_transactions")
+}
