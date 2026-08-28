@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model CustodyWallet {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  chain           String
+  address         String   @unique
+  keyRef          String   @map("key_ref")
+  ledgerAccountId String   @unique @map("ledger_account_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([chain, address])
+  @@map("custody_wallets")
+}
+
+model WalletSignatureLog {
+  id        String   @id @default(cuid())
+  walletId  String   @map("wallet_id")
+  txHash    String?  @map("tx_hash")
+  status    String
+  rawTx     String?  @map("raw_tx")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([walletId])
+  @@map("wallet_signature_logs")
+}
