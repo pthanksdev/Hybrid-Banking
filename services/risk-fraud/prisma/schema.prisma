@@ -1,0 +1,35 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../src/generated/client"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model RiskEvaluation {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  action      String
+  amount      BigInt
+  currency    String
+  score       Int
+  decision    String
+  reasons     Json?
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId])
+  @@index([decision])
+  @@map("risk_evaluations")
+}
+
+model RiskLimit {
+  userId        String   @id @map("user_id")
+  dailyLimit    BigInt   @map("daily_limit")
+  monthlyLimit  BigInt   @map("monthly_limit")
+  currentDaily  BigInt   @default(0) @map("current_daily")
+  updatedAt     DateTime @updatedAt @map("updated_at")
+
+  @@map("risk_limits")
+}
